@@ -39,9 +39,9 @@ func main() {
 	server := &http.Server{
 		Addr:         cfg.Addr,
 		Handler:      e,
-		ReadTimeout:  cfg.HTTPReadTimeout,
-		WriteTimeout: cfg.HTTPWriteTimeout,
-		IdleTimeout:  cfg.HTTPIdleTimeout,
+		ReadTimeout:  cfg.HTTP.ReadTimeout,
+		WriteTimeout: cfg.HTTP.WriteTimeout,
+		IdleTimeout:  cfg.HTTP.IdleTimeout,
 	}
 
 	go func() {
@@ -57,7 +57,7 @@ func main() {
 	<-quit
 	log.Info("shutting down...")
 
-	ctx, cancel := context.WithTimeout(context.Background(), cfg.HTTPShutdownTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.HTTP.ShutdownTimeout)
 	defer cancel()
 
 	if err := server.Shutdown(ctx); err != nil {
