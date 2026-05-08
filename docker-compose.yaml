@@ -28,8 +28,8 @@ services:
       POSTGRES_DB: booking_service
     volumes:
       - pgdata:/var/lib/postgresql/data
-      # # "./migrations/init.sql" - путь к миграциям БД
-      # - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # "./migrations/init.sql" - путь к миграциям БД
+      - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     healthcheck:
