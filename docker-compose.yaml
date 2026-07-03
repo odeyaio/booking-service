@@ -27,7 +27,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: booking_service
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql
       # "./migrations/init.sql" - путь к миграциям БД
       - ./migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
