@@ -49,15 +49,20 @@ CREATE TABLE IF NOT EXISTS schedule (
   room_id UUID NOT NULL UNIQUE REFERENCES room(id) ON DELETE CASCADE,
   days_of_week SMALLINT [] NOT NULL,
   start_time TIME NOT NULL,
-  end_time TIME NOT NULL
+  end_time TIME NOT NULL,
+  CONSTRAINT uq_schedule_id_room UNIQUE (id, room_id)
 );
 
 CREATE TABLE IF NOT EXISTS slot (
   id UUID PRIMARY KEY,
-  room_id UUID NOT NULL REFERENCES room(id) ON DELETE CASCADE,
-  schedule_id UUID NOT NULL REFERENCES schedule(id) ON DELETE CASCADE,
+  room_id UUID NOT NULL,
+  schedule_id UUID NOT NULL,
   start TIMESTAMPTZ NOT NULL,
-  "end" TIMESTAMPTZ NOT NULL
+  "end" TIMESTAMPTZ NOT NULL,
+  CONSTRAINT fk_slot_schedule_room
+    FOREIGN KEY (schedule_id, room_id)
+    REFERENCES schedule(id, room_id)
+    ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS booking (

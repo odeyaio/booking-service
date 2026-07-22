@@ -8,10 +8,15 @@ import (
 	"os/signal"
 	"syscall"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/odeyaio/booking-service/internal/config"
+	"github.com/odeyaio/booking-service/internal/handler/httperror"
+	roomhandler "github.com/odeyaio/booking-service/internal/handler/room"
 	"github.com/odeyaio/booking-service/internal/logger"
+	roomrepository "github.com/odeyaio/booking-service/internal/repository/room"
+	roomservice "github.com/odeyaio/booking-service/internal/service/room"
 )
 
 func main() {
@@ -25,9 +30,15 @@ func main() {
 		panic(err)
 	}
 
+	db, err := pgxpool.New(context.Background(), cfg.Database.URL)
+	if err != nil {
+		log.Error("failed to connect to db", "err", err)
+	}
+
 	e := echo.New()
 
 	e.Logger = log
+	e.HTTPErrorHandler = httperror.NewHandler(log)
 
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
@@ -35,6 +46,11 @@ func main() {
 	e.GET("/_info", func(c *echo.Context) error {
 		return nil
 	})
+
+	roomRepo := roomrepository.New(db)
+	roomService := roomservice.New(roomRepo)
+	roomHandler := roomhandler.New(roomService)
+	roomHandler.RegisterRoutes(e)
 
 	server := &http.Server{
 		Addr:         cfg.Addr,
