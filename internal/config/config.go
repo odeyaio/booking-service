@@ -1,10 +1,12 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
+	"github.com/joho/godotenv"
 	"github.com/odeyaio/booking-service/internal/logger"
 )
 
@@ -32,6 +34,10 @@ type HTTPConfig struct {
 }
 
 func Load() (Config, error) {
+	if err := godotenv.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
+		return Config{}, fmt.Errorf("load .env: %w", err)
+	}
+
 	l := envLoader{}
 
 	cfg := Config{
