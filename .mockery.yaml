@@ -1,0 +1,17 @@
+template: testify
+formatter: gofmt
+
+dir: "{{.InterfaceDir}}"
+filename: "mocks_test.go"
+pkgname: "{{.SrcPackageName}}"
+structname: "Mock{{.InterfaceName | firstUpper}}"
+
+force-file-write: true
+
+packages:
+  github.com/odeyaio/booking-service/internal/handler/room:
+    config:
+      all: true
+  github.com/odeyaio/booking-service/internal/service/room:
+    config:
+      all: true
