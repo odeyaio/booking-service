@@ -15,6 +15,7 @@ import (
 	"github.com/odeyaio/booking-service/internal/handler/httperror"
 	roomhandler "github.com/odeyaio/booking-service/internal/handler/room"
 	"github.com/odeyaio/booking-service/internal/logger"
+	"github.com/odeyaio/booking-service/internal/repository"
 	roomrepository "github.com/odeyaio/booking-service/internal/repository/room"
 	roomservice "github.com/odeyaio/booking-service/internal/service/room"
 )
@@ -30,7 +31,7 @@ func main() {
 		panic(err)
 	}
 
-	db, err := pgxpool.New(context.Background(), cfg.Database.URL)
+	db, err := pgxpool.New(context.Background(), repository.ConnectionURL(cfg))
 	if err != nil {
 		log.Error("failed to connect to db", "err", err)
 	}
@@ -53,7 +54,7 @@ func main() {
 	roomHandler.RegisterRoutes(e)
 
 	server := &http.Server{
-		Addr:         cfg.Addr,
+		Addr:         ":8080",
 		Handler:      e,
 		ReadTimeout:  cfg.HTTP.ReadTimeout,
 		WriteTimeout: cfg.HTTP.WriteTimeout,

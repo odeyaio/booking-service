@@ -13,6 +13,7 @@ RUN apk --no-cache add ca-certificates tzdata
 WORKDIR /booking-service
 
 COPY --from=builder /booking-service/server .
+COPY --from=builder /booking-service/resources ./resources
 
 EXPOSE 8080
 CMD ["./server"]

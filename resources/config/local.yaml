@@ -1,0 +1,7 @@
+env: local
+
+http:
+  read_timeout: 15s
+  write_timeout: 15s
+  idle_timeout: 60s
+  shutdown_timeout: 30s
