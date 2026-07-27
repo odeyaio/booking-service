@@ -38,7 +38,7 @@ func New(db *pgxpool.Pool) *Repository {
 }
 
 func (r *Repository) Create(ctx context.Context, room *model.Room) error {
-	const op = "RoomRepository.Create"
+	const op = "room.Repository.Create"
 
 	err := r.db.QueryRow(ctx, queryCreate,
 		room.ID,
@@ -54,7 +54,7 @@ func (r *Repository) Create(ctx context.Context, room *model.Room) error {
 }
 
 func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (model.Room, error) {
-	const op = "RoomRepository.GetByID"
+	const op = "room.Repository.GetByID"
 
 	rows, err := r.db.Query(ctx, queryByID, id)
 	if err != nil {
@@ -74,7 +74,7 @@ func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (model.Room, err
 }
 
 func (r *Repository) List(ctx context.Context) ([]model.Room, error) {
-	const op = "RoomRepository.List"
+	const op = "room.Repository.List"
 
 	rows, err := r.db.Query(ctx, queryList)
 	if err != nil {

@@ -24,7 +24,7 @@ func New(repo roomRepository) *Service {
 }
 
 func (s *Service) Create(ctx context.Context, name string, description *string, capacity *int) (model.Room, error) {
-	const op = "RoomService.Create"
+	const op = "room.Service.Create"
 
 	name = strings.TrimSpace(name)
 	if name == "" {
@@ -50,7 +50,7 @@ func (s *Service) Create(ctx context.Context, name string, description *string, 
 }
 
 func (s *Service) List(ctx context.Context) ([]model.Room, error) {
-	const op = "RoomService.List"
+	const op = "room.Service.List"
 
 	rooms, err := s.repo.List(ctx)
 	if err != nil {
