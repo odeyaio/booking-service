@@ -1,4 +1,4 @@
-package handlertest
+package handler
 
 import (
 	"io"
@@ -8,13 +8,12 @@ import (
 	"testing"
 
 	"github.com/labstack/echo/v5"
-	"github.com/odeyaio/booking-service/internal/handler/httperror"
 	"github.com/stretchr/testify/assert"
 )
 
 func NewEcho() *echo.Echo {
 	e := echo.New()
-	e.HTTPErrorHandler = httperror.NewHandler(
+	e.HTTPErrorHandler = NewHTTPErrorHandler(
 		slog.New(slog.NewTextHandler(io.Discard, nil)),
 	)
 	return e

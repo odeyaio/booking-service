@@ -1,4 +1,4 @@
-package room
+package service
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
-	"github.com/odeyaio/booking-service/internal/service"
 )
 
 type roomRepository interface {
@@ -15,24 +14,24 @@ type roomRepository interface {
 	List(ctx context.Context) ([]model.Room, error)
 }
 
-type Service struct {
+type RoomService struct {
 	repo roomRepository
 }
 
-func New(repo roomRepository) *Service {
-	return &Service{repo: repo}
+func NewRoomService(repo roomRepository) *RoomService {
+	return &RoomService{repo: repo}
 }
 
-func (s *Service) Create(ctx context.Context, name string, description *string, capacity *int) (model.Room, error) {
-	const op = "room.Service.Create"
+func (s *RoomService) Create(ctx context.Context, name string, description *string, capacity *int) (model.Room, error) {
+	const op = "RoomService.Create"
 
 	name = strings.TrimSpace(name)
 	if name == "" {
-		return model.Room{}, fmt.Errorf("%s: %w", op, service.ErrInvalidInput)
+		return model.Room{}, fmt.Errorf("%s: %w", op, ErrInvalidInput)
 	}
 
 	if capacity != nil && *capacity <= 0 {
-		return model.Room{}, fmt.Errorf("%s: %w", op, service.ErrInvalidInput)
+		return model.Room{}, fmt.Errorf("%s: %w", op, ErrInvalidInput)
 	}
 
 	room := model.Room{
@@ -49,8 +48,8 @@ func (s *Service) Create(ctx context.Context, name string, description *string, 
 	return room, nil
 }
 
-func (s *Service) List(ctx context.Context) ([]model.Room, error) {
-	const op = "room.Service.List"
+func (s *RoomService) List(ctx context.Context) ([]model.Room, error) {
+	const op = "RoomService.List"
 
 	rooms, err := s.repo.List(ctx)
 	if err != nil {

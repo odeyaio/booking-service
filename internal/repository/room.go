@@ -1,4 +1,4 @@
-package room
+package repository
 
 import (
 	"context"
@@ -9,38 +9,37 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/odeyaio/booking-service/internal/model"
-	"github.com/odeyaio/booking-service/internal/repository"
 )
 
 const (
-	queryCreate = `
+	queryRoomCreate = `
 	INSERT INTO room (id, name, description, capacity)
 	VALUES ($1, $2, $3, $4)
 	RETURNING created_at`
 
-	queryByID = `
+	queryRoomByID = `
 	SELECT id, name, description, capacity, created_at
 	FROM room
 	WHERE id = $1`
 
-	queryList = `
+	queryRoomList = `
 	SELECT id, name, description, capacity, created_at
 	FROM room
 	ORDER BY created_at, id`
 )
 
-type Repository struct {
+type RoomRepository struct {
 	db *pgxpool.Pool
 }
 
-func New(db *pgxpool.Pool) *Repository {
-	return &Repository{db: db}
+func NewRoomRepository(db *pgxpool.Pool) *RoomRepository {
+	return &RoomRepository{db: db}
 }
 
-func (r *Repository) Create(ctx context.Context, room *model.Room) error {
-	const op = "room.Repository.Create"
+func (r *RoomRepository) Create(ctx context.Context, room *model.Room) error {
+	const op = "RoomRepository.Create"
 
-	err := r.db.QueryRow(ctx, queryCreate,
+	err := r.db.QueryRow(ctx, queryRoomCreate,
 		room.ID,
 		room.Name,
 		room.Description,
@@ -53,10 +52,10 @@ func (r *Repository) Create(ctx context.Context, room *model.Room) error {
 	return nil
 }
 
-func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (model.Room, error) {
-	const op = "room.Repository.GetByID"
+func (r *RoomRepository) GetByID(ctx context.Context, id uuid.UUID) (model.Room, error) {
+	const op = "RoomRepository.GetByID"
 
-	rows, err := r.db.Query(ctx, queryByID, id)
+	rows, err := r.db.Query(ctx, queryRoomByID, id)
 	if err != nil {
 		return model.Room{}, fmt.Errorf("%s: %w", op, err)
 	}
@@ -64,7 +63,7 @@ func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (model.Room, err
 	room, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[model.Room])
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			err = repository.ErrNotFound
+			err = ErrNotFound
 		}
 
 		return model.Room{}, fmt.Errorf("%s: %w", op, err)
@@ -73,10 +72,10 @@ func (r *Repository) GetByID(ctx context.Context, id uuid.UUID) (model.Room, err
 	return room, nil
 }
 
-func (r *Repository) List(ctx context.Context) ([]model.Room, error) {
-	const op = "room.Repository.List"
+func (r *RoomRepository) List(ctx context.Context) ([]model.Room, error) {
+	const op = "RoomRepository.List"
 
-	rows, err := r.db.Query(ctx, queryList)
+	rows, err := r.db.Query(ctx, queryRoomList)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

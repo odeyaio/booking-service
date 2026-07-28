@@ -9,9 +9,9 @@ structname: "Mock{{.InterfaceName | firstUpper}}"
 force-file-write: true
 
 packages:
-  github.com/odeyaio/booking-service/internal/handler/room:
+  github.com/odeyaio/booking-service/internal/handler:
     config:
       all: true
-  github.com/odeyaio/booking-service/internal/service/room:
+  github.com/odeyaio/booking-service/internal/service:
     config:
       all: true

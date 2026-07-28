@@ -1,15 +1,12 @@
-package httperror_test
+package handler_test
 
 import (
 	"errors"
-	"io"
-	"log/slog"
 	"net/http"
 	"testing"
 
 	"github.com/labstack/echo/v5"
-	"github.com/odeyaio/booking-service/internal/handler/handlertest"
-	"github.com/odeyaio/booking-service/internal/handler/httperror"
+	"github.com/odeyaio/booking-service/internal/handler"
 )
 
 func TestHandler(t *testing.T) {
@@ -21,7 +18,7 @@ func TestHandler(t *testing.T) {
 	}{
 		{
 			name:       "400 application error",
-			err:        httperror.New(http.StatusBadRequest, httperror.CodeInvalidRequest, "invalid request"),
+			err:        handler.NewHTTPError(http.StatusBadRequest, handler.ErrorCodeInvalidRequest, "invalid request"),
 			wantStatus: http.StatusBadRequest,
 			wantBody: `{
 				"error": {
@@ -45,15 +42,12 @@ func TestHandler(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			e := echo.New()
-			e.HTTPErrorHandler = httperror.NewHandler(
-				slog.New(slog.NewTextHandler(io.Discard, nil)),
-			)
+			e := handler.NewEcho()
 			e.GET("/test", func(c *echo.Context) error {
 				return tt.err
 			})
 
-			rec := handlertest.PerformJSONRequest(
+			rec := handler.PerformJSONRequest(
 				t,
 				e,
 				http.MethodGet,
@@ -61,7 +55,7 @@ func TestHandler(t *testing.T) {
 				"",
 			)
 
-			handlertest.AssertJSONResponse(t, rec, tt.wantStatus, tt.wantBody)
+			handler.AssertJSONResponse(t, rec, tt.wantStatus, tt.wantBody)
 		})
 	}
 }

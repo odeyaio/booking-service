@@ -5,7 +5,6 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
-	"github.com/odeyaio/booking-service/internal/handler/handlertest"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/service"
 	"github.com/stretchr/testify/mock"
@@ -76,10 +75,10 @@ func TestHandler_Create(t *testing.T) {
 			svc := NewMockRoomService(t)
 			tt.setupMock(svc)
 
-			e := handlertest.NewEcho()
-			New(svc).RegisterRoutes(e)
+			e := NewEcho()
+			NewRoomHandler(svc).RegisterRoutes(e)
 
-			rec := handlertest.PerformJSONRequest(
+			rec := PerformJSONRequest(
 				t,
 				e,
 				http.MethodPost,
@@ -87,7 +86,7 @@ func TestHandler_Create(t *testing.T) {
 				tt.body,
 			)
 
-			handlertest.AssertJSONResponse(t, rec, tt.wantStatus, tt.wantBody)
+			AssertJSONResponse(t, rec, tt.wantStatus, tt.wantBody)
 		})
 	}
 }
@@ -141,10 +140,10 @@ func TestHandler_List(t *testing.T) {
 			svc := NewMockRoomService(t)
 			tt.setupMock(svc)
 
-			e := handlertest.NewEcho()
-			New(svc).RegisterRoutes(e)
+			e := NewEcho()
+			NewRoomHandler(svc).RegisterRoutes(e)
 
-			rec := handlertest.PerformJSONRequest(
+			rec := PerformJSONRequest(
 				t,
 				e,
 				http.MethodGet,
@@ -152,7 +151,7 @@ func TestHandler_List(t *testing.T) {
 				"",
 			)
 
-			handlertest.AssertJSONResponse(t, rec, tt.wantStatus, tt.wantBody)
+			AssertJSONResponse(t, rec, tt.wantStatus, tt.wantBody)
 		})
 	}
 }

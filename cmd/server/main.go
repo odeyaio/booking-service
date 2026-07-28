@@ -12,12 +12,10 @@ import (
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	"github.com/odeyaio/booking-service/internal/config"
-	"github.com/odeyaio/booking-service/internal/handler/httperror"
-	roomhandler "github.com/odeyaio/booking-service/internal/handler/room"
+	"github.com/odeyaio/booking-service/internal/handler"
 	"github.com/odeyaio/booking-service/internal/logger"
 	"github.com/odeyaio/booking-service/internal/repository"
-	roomrepository "github.com/odeyaio/booking-service/internal/repository/room"
-	roomservice "github.com/odeyaio/booking-service/internal/service/room"
+	"github.com/odeyaio/booking-service/internal/service"
 )
 
 func main() {
@@ -39,7 +37,7 @@ func main() {
 	e := echo.New()
 
 	e.Logger = log
-	e.HTTPErrorHandler = httperror.NewHandler(log)
+	e.HTTPErrorHandler = handler.NewHTTPErrorHandler(log)
 
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
@@ -48,9 +46,9 @@ func main() {
 		return nil
 	})
 
-	roomRepo := roomrepository.New(db)
-	roomService := roomservice.New(roomRepo)
-	roomHandler := roomhandler.New(roomService)
+	roomRepo := repository.NewRoomRepository(db)
+	roomService := service.NewRoomService(roomRepo)
+	roomHandler := handler.NewRoomHandler(roomService)
 	roomHandler.RegisterRoutes(e)
 
 	server := &http.Server{

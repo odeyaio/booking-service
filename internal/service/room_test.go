@@ -1,4 +1,4 @@
-package room
+package service
 
 import (
 	"context"
@@ -7,7 +7,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
-	"github.com/odeyaio/booking-service/internal/service"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -54,13 +53,13 @@ func TestService_Create(t *testing.T) {
 		{
 			name:     "empty name",
 			roomName: "   ",
-			wantErr:  service.ErrInvalidInput,
+			wantErr:  ErrInvalidInput,
 		},
 		{
 			name:     "zero capacity",
 			roomName: "Room 1",
 			capacity: &zeroCapacity,
-			wantErr:  service.ErrInvalidInput,
+			wantErr:  ErrInvalidInput,
 		},
 		{
 			name:     "repository error",
@@ -84,7 +83,7 @@ func TestService_Create(t *testing.T) {
 				tt.setupMock(repo)
 			}
 
-			got, err := New(repo).Create(
+			got, err := NewRoomService(repo).Create(
 				ctx,
 				tt.roomName,
 				tt.description,
@@ -160,7 +159,7 @@ func TestService_List(t *testing.T) {
 			repo := NewMockRoomRepository(t)
 			tt.setupMock(repo)
 
-			got, err := New(repo).List(ctx)
+			got, err := NewRoomService(repo).List(ctx)
 
 			if tt.wantErr != nil {
 				require.ErrorIs(t, err, tt.wantErr)

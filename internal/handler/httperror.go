@@ -1,4 +1,4 @@
-package httperror
+package handler
 
 import (
 	"errors"
@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	CodeInvalidRequest = "INVALID_REQUEST"
-	CodeUnauthorized   = "UNAUTHORIZED"
-	CodeForbidden      = "FORBIDDEN"
-	CodeNotFound       = "NOT_FOUND"
-	CodeInternal       = "INTERNAL_ERROR"
+	ErrorCodeInvalidRequest = "INVALID_REQUEST"
+	ErrorCodeUnauthorized   = "UNAUTHORIZED"
+	ErrorCodeForbidden      = "FORBIDDEN"
+	ErrorCodeNotFound       = "NOT_FOUND"
+	ErrorCodeInternal       = "INTERNAL_ERROR"
 )
 
 type ErrorResponse struct {
@@ -41,7 +41,7 @@ type httpError struct {
 	message string
 }
 
-func New(status int, code, message string) error {
+func NewHTTPError(status int, code, message string) error {
 	return &httpError{
 		status:  status,
 		code:    code,
@@ -53,10 +53,10 @@ func (e *httpError) Error() string {
 	return fmt.Sprintf("%s: %s", e.code, e.message)
 }
 
-func NewHandler(log *slog.Logger) echo.HTTPErrorHandler {
+func NewHTTPErrorHandler(log *slog.Logger) echo.HTTPErrorHandler {
 	return func(c *echo.Context, err error) {
 		status := http.StatusInternalServerError
-		code := CodeInternal
+		code := ErrorCodeInternal
 		message := "internal server error"
 
 		if appErr, ok := errors.AsType[*httpError](err); ok {

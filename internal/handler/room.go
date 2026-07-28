@@ -8,18 +8,17 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	"github.com/odeyaio/booking-service/internal/handler/httperror"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/service"
 )
 
-type createRequest struct {
+type roomCreateRequest struct {
 	Name        string  `json:"name"`
 	Description *string `json:"description"`
 	Capacity    *int    `json:"capacity"`
 }
 
-type response struct {
+type roomResponse struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	Description *string   `json:"description"`
@@ -27,16 +26,16 @@ type response struct {
 	CreatedAt   time.Time `json:"createdAt"`
 }
 
-type createResponse struct {
-	Room response `json:"room"`
+type roomCreateResponse struct {
+	Room roomResponse `json:"room"`
 }
 
-type listResponse struct {
-	Rooms []response `json:"rooms"`
+type roomListResponse struct {
+	Rooms []roomResponse `json:"rooms"`
 }
 
-func toResponse(room model.Room) response {
-	return response{
+func toRoomResponse(room model.Room) roomResponse {
+	return roomResponse{
 		ID:          room.ID,
 		Name:        room.Name,
 		Description: room.Description,
@@ -50,25 +49,25 @@ type roomService interface {
 	List(ctx context.Context) ([]model.Room, error)
 }
 
-type Handler struct {
+type RoomHandler struct {
 	svc roomService
 }
 
-func New(svc roomService) *Handler {
-	return &Handler{svc: svc}
+func NewRoomHandler(svc roomService) *RoomHandler {
+	return &RoomHandler{svc: svc}
 }
 
-func (h *Handler) RegisterRoutes(e *echo.Echo) {
+func (h *RoomHandler) RegisterRoutes(e *echo.Echo) {
 	e.GET("/rooms/list", h.List)
 	e.POST("/rooms/create", h.Create)
 }
 
-func (h *Handler) Create(c *echo.Context) error {
-	var req createRequest
+func (h *RoomHandler) Create(c *echo.Context) error {
+	var req roomCreateRequest
 	if err := c.Bind(&req); err != nil {
-		return httperror.New(
+		return NewHTTPError(
 			http.StatusBadRequest,
-			httperror.CodeInvalidRequest,
+			ErrorCodeInvalidRequest,
 			"invalid request",
 		)
 	}
@@ -76,29 +75,29 @@ func (h *Handler) Create(c *echo.Context) error {
 	room, err := h.svc.Create(c.Request().Context(), req.Name, req.Description, req.Capacity)
 	if err != nil {
 		if errors.Is(err, service.ErrInvalidInput) {
-			return httperror.New(http.StatusBadRequest, httperror.CodeInvalidRequest, "invalid request")
+			return NewHTTPError(http.StatusBadRequest, ErrorCodeInvalidRequest, "invalid request")
 		}
 
 		return err
 	}
 
-	return c.JSON(http.StatusCreated, createResponse{
-		Room: toResponse(room),
+	return c.JSON(http.StatusCreated, roomCreateResponse{
+		Room: toRoomResponse(room),
 	})
 }
 
-func (h *Handler) List(c *echo.Context) error {
+func (h *RoomHandler) List(c *echo.Context) error {
 	rooms, err := h.svc.List(c.Request().Context())
 	if err != nil {
 		return err
 	}
 
-	resp := make([]response, 0, len(rooms))
+	resp := make([]roomResponse, 0, len(rooms))
 	for _, room := range rooms {
-		resp = append(resp, toResponse(room))
+		resp = append(resp, toRoomResponse(room))
 	}
 
-	return c.JSON(http.StatusOK, listResponse{
+	return c.JSON(http.StatusOK, roomListResponse{
 		Rooms: resp,
 	})
 }
