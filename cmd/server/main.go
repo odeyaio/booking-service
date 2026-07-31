@@ -51,6 +51,17 @@ func main() {
 	roomHandler := handler.NewRoomHandler(roomService)
 	roomHandler.RegisterRoutes(e)
 
+	slotRepo := repository.NewSlotRepository(db)
+	slotGenerator := service.NewSlotGenerator(slotRepo)
+	slotService := service.NewSlotService(slotRepo)
+	slotHandler := handler.NewSlotHandler(slotService)
+	slotHandler.RegisterRoutes(e)
+
+	scheduleRepo := repository.NewScheduleRepository(db)
+	scheduleService := service.NewScheduleService(scheduleRepo, slotGenerator)
+	scheduleHandler := handler.NewScheduleHandler(scheduleService)
+	scheduleHandler.RegisterRoutes(e)
+
 	server := &http.Server{
 		Addr:         ":8080",
 		Handler:      e,

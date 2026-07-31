@@ -39,9 +39,9 @@ type Room struct {
 type Schedule struct {
 	ID         uuid.UUID `db:"id"`
 	RoomID     uuid.UUID `db:"room_id"`
-	DaysOfWeek []int     `db:"days_of_week"`
-	StartTime  string    `db:"start_time"`
-	EndTime    string    `db:"end_time"`
+	DaysOfWeek []Weekday `db:"days_of_week"`
+	StartTime  TimeOfDay `db:"start_time"`
+	EndTime    TimeOfDay `db:"end_time"`
 }
 
 type Slot struct {
