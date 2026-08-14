@@ -2,17 +2,23 @@ CREATE TABLE IF NOT EXISTS role (
   id SMALLINT PRIMARY KEY,
   name VARCHAR(50) NOT NULL UNIQUE
 );
+
 INSERT INTO role
-VALUES (1, 'admin'),
-  (2, 'user') ON CONFLICT DO NOTHING;
+VALUES
+  (1, 'admin'),
+  (2, 'user')
+ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS booking_status (
   id SMALLINT PRIMARY KEY,
   name VARCHAR(50) NOT NULL UNIQUE
 );
+
 INSERT INTO booking_status
-VALUES (1, 'active'),
-  (2, 'cancelled') ON CONFLICT DO NOTHING;
+VALUES
+  (1, 'active'),
+  (2, 'cancelled')
+ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS "user" (
   id UUID PRIMARY KEY,
@@ -23,7 +29,8 @@ CREATE TABLE IF NOT EXISTS "user" (
 );
 
 INSERT INTO "user" (id, email, password_hash, role_id)
-VALUES (
+VALUES
+  (
     '00000000-0000-0000-0000-000000000001',
     'admin@example.com',
     '$2a$10$placeholder_admin_hash',
@@ -34,7 +41,8 @@ VALUES (
     'user@example.com',
     '$2a$10$placeholder_user_hash',
     2
-  ) ON CONFLICT DO NOTHING;
+  )
+ON CONFLICT DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS room (
   id UUID PRIMARY KEY,
@@ -47,7 +55,7 @@ CREATE TABLE IF NOT EXISTS room (
 CREATE TABLE IF NOT EXISTS schedule (
   id UUID PRIMARY KEY,
   room_id UUID NOT NULL UNIQUE REFERENCES room(id) ON DELETE CASCADE,
-  days_of_week SMALLINT [] NOT NULL,
+  days_of_week SMALLINT[] NOT NULL,
   start_time TIME NOT NULL,
   end_time TIME NOT NULL,
   CONSTRAINT uq_schedule_id_room UNIQUE (id, room_id)
@@ -73,10 +81,15 @@ CREATE TABLE IF NOT EXISTS booking (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_slot_room_start ON slot(room_id, start);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_slot_room_start
+  ON slot(room_id, start);
 
-CREATE INDEX IF NOT EXISTS idx_booking_user ON booking(user_id);
+CREATE INDEX IF NOT EXISTS idx_booking_user
+  ON booking(user_id);
 
-CREATE INDEX IF NOT EXISTS idx_booking_slot ON booking(slot_id);
+CREATE INDEX IF NOT EXISTS idx_booking_slot
+  ON booking(slot_id);
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_active_booking_slot ON booking(slot_id) WHERE status_id = 1;
+CREATE UNIQUE INDEX IF NOT EXISTS uq_active_booking_slot
+  ON booking(slot_id)
+  WHERE status_id = 1;

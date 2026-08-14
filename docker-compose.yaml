@@ -11,6 +11,24 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - internal
+
+  migrate:
+    image: migrate/migrate:v4.19.1
+    volumes:
+      - ./resources/migrations:/migrations:ro
+    entrypoint:
+      - migrate
+      - -path=/migrations
+      - -database=postgres://${DATABASE_USER:-postgres}:${DATABASE_PASSWORD:-password}@db:5432/${DATABASE_NAME:-booking_service}?sslmode=disable
+    command: ["up"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
     networks:
       - internal
 
@@ -22,12 +40,11 @@ services:
       - path: .env
         required: false
     environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-password}
+      POSTGRES_DB: ${DATABASE_NAME:-booking_service}
     volumes:
       - pgdata:/var/lib/postgresql
-      - ./resources/migrations/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
       - "5432:5432"
     healthcheck:
