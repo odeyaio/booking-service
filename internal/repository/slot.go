@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"time"
 
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,11 +33,15 @@ const querySlotByID = `
 	WHERE id = $1`
 
 type SlotRepository struct {
-	db *pgxpool.Pool
+	db       *pgxpool.Pool
+	txGetter *trmpgx.CtxGetter
 }
 
 func NewSlotRepository(db *pgxpool.Pool) *SlotRepository {
-	return &SlotRepository{db: db}
+	return &SlotRepository{
+		db:       db,
+		txGetter: trmpgx.DefaultCtxGetter,
+	}
 }
 
 func (r *SlotRepository) CreateBatch(ctx context.Context, slots []model.Slot) error {
@@ -57,7 +62,7 @@ func (r *SlotRepository) CreateBatch(ctx context.Context, slots []model.Slot) er
 		return nil
 	}
 
-	_, err := r.db.CopyFrom(
+	_, err := r.txGetter.DefaultTrOrDB(ctx, r.db).CopyFrom(
 		ctx,
 		pgx.Identifier{"slot"},
 		[]string{"id", "room_id", "schedule_id", "start", "end"},
@@ -73,7 +78,7 @@ func (r *SlotRepository) CreateBatch(ctx context.Context, slots []model.Slot) er
 func (r *SlotRepository) GetByID(ctx context.Context, id uuid.UUID) (model.Slot, error) {
 	const op = "SlotRepository.GetByID"
 
-	rows, err := r.db.Query(ctx, querySlotByID, id)
+	rows, err := r.txGetter.DefaultTrOrDB(ctx, r.db).Query(ctx, querySlotByID, id)
 	if err != nil {
 		return model.Slot{}, fmt.Errorf("%s: %w", op, err)
 	}
@@ -97,7 +102,7 @@ func (r *SlotRepository) ListAvailable(
 ) ([]model.Slot, error) {
 	const op = "SlotRepository.ListAvailable"
 
-	rows, err := r.db.Query(ctx, querySlotListAvailable, roomID, from, to)
+	rows, err := r.txGetter.DefaultTrOrDB(ctx, r.db).Query(ctx, querySlotListAvailable, roomID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}

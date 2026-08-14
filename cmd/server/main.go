@@ -8,6 +8,8 @@ import (
 	"os/signal"
 	"syscall"
 
+	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
+	"github.com/avito-tech/go-transaction-manager/trm/v2/manager"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
@@ -33,6 +35,7 @@ func main() {
 	if err != nil {
 		log.Error("failed to connect to db", "err", err)
 	}
+	txManager := manager.Must(trmpgx.NewDefaultFactory(db))
 
 	e := echo.New()
 
@@ -56,7 +59,7 @@ func main() {
 	slotHandler := handler.NewSlotHandler(slotService)
 
 	scheduleRepo := repository.NewScheduleRepository(db)
-	scheduleService := service.NewScheduleService(scheduleRepo, slotGenerator)
+	scheduleService := service.NewScheduleService(scheduleRepo, slotGenerator, txManager)
 	scheduleHandler := handler.NewScheduleHandler(scheduleService)
 
 	bookingRepo := repository.NewBookingRepository(db)
