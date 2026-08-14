@@ -6,7 +6,8 @@ services:
       - "8080:8080"
     env_file:
       - .env_example
-      - .env
+      - path: .env
+        required: false
     depends_on:
       db:
         condition: service_healthy
@@ -18,7 +19,8 @@ services:
     container_name: postgres
     env_file:
       - .env_example
-      - .env
+      - path: .env
+        required: false
     environment:
       POSTGRES_USER: ${DATABASE_USER}
       POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
