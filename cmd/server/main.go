@@ -69,6 +69,10 @@ func main() {
 	bookingService := service.NewBookingService(bookingRepo, slotRepo)
 	bookingHandler := handler.NewBookingHandler(bookingService)
 
+	userRepo := repository.NewUserRepository(db)
+	userService := service.NewUserService(userRepo)
+	userHandler := handler.NewUserHandler(userService, cfg.Auth.JWTSecret)
+
 	slotGeneratorWorker := worker.NewSlotGeneratorWorker(
 		scheduleRepo,
 		slotGenerator,
@@ -85,13 +89,15 @@ func main() {
 	}()
 
 	if cfg.Auth.DummyLogin.Enabled {
-		authHandler := handler.NewAuthHandler(
+		dummyLoginHandler := handler.NewDummyLoginHandler(
 			cfg.Auth.JWTSecret,
 			cfg.Auth.DummyLogin.AdminUserID,
 			cfg.Auth.DummyLogin.UserUserID,
 		)
-		e.POST("/dummyLogin", authHandler.DummyLogin)
+		e.POST("/dummyLogin", dummyLoginHandler.Login)
 	}
+	e.POST("/register", userHandler.Register)
+	e.POST("/login", userHandler.Login)
 
 	authenticated := e.Group("", handler.JWTMiddleware(cfg.Auth.JWTSecret))
 	authenticated.GET("/rooms/list", roomHandler.List)

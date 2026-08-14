@@ -19,10 +19,6 @@ const (
 	principalContextKey = "principal"
 )
 
-type dummyLoginRequest struct {
-	Role Role `json:"role"`
-}
-
 type tokenResponse struct {
 	Token string `json:"token"`
 }
@@ -56,46 +52,12 @@ func PrincipalFromContext(c *echo.Context) (Principal, bool) {
 	return principal, ok
 }
 
-type AuthHandler struct {
-	secret      []byte
-	adminUserID uuid.UUID
-	userUserID  uuid.UUID
-}
-
-func NewAuthHandler(secret string, adminUserID, userUserID uuid.UUID) *AuthHandler {
-	return &AuthHandler{
-		secret:      []byte(secret),
-		adminUserID: adminUserID,
-		userUserID:  userUserID,
-	}
-}
-
-func (h *AuthHandler) DummyLogin(c *echo.Context) error {
-	var req dummyLoginRequest
-	if err := c.Bind(&req); err != nil {
-		return NewHTTPError(http.StatusBadRequest, ErrorCodeInvalidRequest, "invalid request")
-	}
-
-	var userID uuid.UUID
-	switch req.Role {
-	case RoleAdmin:
-		userID = h.adminUserID
-	case RoleUser:
-		userID = h.userUserID
-	default:
-		return NewHTTPError(http.StatusBadRequest, ErrorCodeInvalidRequest, "invalid request")
-	}
-
+func signToken(secret []byte, userID uuid.UUID, role Role) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, AuthClaims{
 		UserID: userID,
-		Role:   req.Role,
+		Role:   role,
 	})
-	signedToken, err := token.SignedString(h.secret)
-	if err != nil {
-		return err
-	}
-
-	return c.JSON(http.StatusOK, tokenResponse{Token: signedToken})
+	return token.SignedString(secret)
 }
 
 func JWTMiddleware(secret string) echo.MiddlewareFunc {
