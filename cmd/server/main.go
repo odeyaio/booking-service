@@ -49,18 +49,32 @@ func main() {
 	roomRepo := repository.NewRoomRepository(db)
 	roomService := service.NewRoomService(roomRepo)
 	roomHandler := handler.NewRoomHandler(roomService)
-	roomHandler.RegisterRoutes(e)
 
 	slotRepo := repository.NewSlotRepository(db)
 	slotGenerator := service.NewSlotGenerator(slotRepo)
 	slotService := service.NewSlotService(slotRepo)
 	slotHandler := handler.NewSlotHandler(slotService)
-	slotHandler.RegisterRoutes(e)
 
 	scheduleRepo := repository.NewScheduleRepository(db)
 	scheduleService := service.NewScheduleService(scheduleRepo, slotGenerator)
 	scheduleHandler := handler.NewScheduleHandler(scheduleService)
-	scheduleHandler.RegisterRoutes(e)
+
+	if cfg.Auth.DummyLogin.Enabled {
+		authHandler := handler.NewAuthHandler(
+			cfg.Auth.JWTSecret,
+			cfg.Auth.DummyLogin.AdminUserID,
+			cfg.Auth.DummyLogin.UserUserID,
+		)
+		e.POST("/dummyLogin", authHandler.DummyLogin)
+	}
+
+	authenticated := e.Group("", handler.JWTMiddleware(cfg.Auth.JWTSecret))
+	authenticated.GET("/rooms/list", roomHandler.List)
+	authenticated.GET("/rooms/:roomId/slots/list", slotHandler.ListAvailable)
+
+	admin := authenticated.Group("", handler.RequireRole(handler.RoleAdmin))
+	admin.POST("/rooms/create", roomHandler.Create)
+	admin.POST("/rooms/:roomId/schedule/create", scheduleHandler.Create)
 
 	server := &http.Server{
 		Addr:         ":8080",

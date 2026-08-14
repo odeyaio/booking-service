@@ -6,15 +6,23 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
-	"github.com/odeyaio/booking-service/internal/logger"
+)
+
+type Env string
+
+const (
+	EnvLocal Env = "local"
+	EnvDev   Env = "dev"
+	EnvProd  Env = "prod"
 )
 
 type Config struct {
-	Env      logger.Env `yaml:"env" env-default:"local"`
+	Env      Env `yaml:"env" env-default:"local"`
 	Database DatabaseConfig
-	JWT      JWTConfig
+	Auth     AuthConfig `yaml:"auth"`
 	HTTP     HTTPConfig `yaml:"http"`
 }
 
@@ -26,8 +34,15 @@ type DatabaseConfig struct {
 	Name     string `env:"DATABASE_NAME" env-required:"true"`
 }
 
-type JWTConfig struct {
-	Secret string `env:"JWT_SECRET" env-required:"true"`
+type AuthConfig struct {
+	JWTSecret  string           `env:"JWT_SECRET" env-required:"true"`
+	DummyLogin DummyLoginConfig `yaml:"dummy_login"`
+}
+
+type DummyLoginConfig struct {
+	Enabled     bool      `yaml:"enabled"`
+	AdminUserID uuid.UUID `yaml:"admin_user_id"`
+	UserUserID  uuid.UUID `yaml:"user_user_id"`
 }
 
 type HTTPConfig struct {
@@ -61,9 +76,20 @@ func Load() (Config, error) {
 
 func (c Config) Validate() error {
 	switch c.Env {
-	case logger.EnvLocal, logger.EnvDev, logger.EnvProd:
-		return nil
+	case EnvLocal, EnvDev, EnvProd:
 	default:
 		return fmt.Errorf("invalid environment: %q", c.Env)
 	}
+
+	if !c.Auth.DummyLogin.Enabled {
+		return nil
+	}
+	if c.Auth.DummyLogin.AdminUserID == uuid.Nil {
+		return errors.New("auth.dummy_login.admin_user_id is required when dummy login is enabled")
+	}
+	if c.Auth.DummyLogin.UserUserID == uuid.Nil {
+		return errors.New("auth.dummy_login.user_user_id is required when dummy login is enabled")
+	}
+
+	return nil
 }

@@ -76,7 +76,7 @@ func TestHandler_Create(t *testing.T) {
 			tt.setupMock(svc)
 
 			e := NewEcho()
-			NewRoomHandler(svc).RegisterRoutes(e)
+			e.POST("/rooms/create", NewRoomHandler(svc).Create)
 
 			rec := PerformJSONRequest(
 				t,
@@ -141,7 +141,7 @@ func TestHandler_List(t *testing.T) {
 			tt.setupMock(svc)
 
 			e := NewEcho()
-			NewRoomHandler(svc).RegisterRoutes(e)
+			e.GET("/rooms/list", NewRoomHandler(svc).List)
 
 			rec := PerformJSONRequest(
 				t,

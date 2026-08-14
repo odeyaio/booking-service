@@ -49,10 +49,6 @@ func NewSlotHandler(svc slotService) *SlotHandler {
 	return &SlotHandler{svc: svc}
 }
 
-func (h *SlotHandler) RegisterRoutes(e *echo.Echo) {
-	e.GET("/rooms/:roomId/slots/list", h.ListAvailable)
-}
-
 func (h *SlotHandler) ListAvailable(c *echo.Context) error {
 	var req slotListAvailableRequest
 	if err := c.Bind(&req); err != nil {

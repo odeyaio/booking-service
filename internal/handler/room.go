@@ -57,11 +57,6 @@ func NewRoomHandler(svc roomService) *RoomHandler {
 	return &RoomHandler{svc: svc}
 }
 
-func (h *RoomHandler) RegisterRoutes(e *echo.Echo) {
-	e.GET("/rooms/list", h.List)
-	e.POST("/rooms/create", h.Create)
-}
-
 func (h *RoomHandler) Create(c *echo.Context) error {
 	var req roomCreateRequest
 	if err := c.Bind(&req); err != nil {

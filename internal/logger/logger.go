@@ -4,27 +4,21 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+
+	"github.com/odeyaio/booking-service/internal/config"
 )
 
-type Env string
-
-const (
-	EnvLocal Env = "local"
-	EnvDev   Env = "dev"
-	EnvProd  Env = "prod"
-)
-
-func Setup(env Env) (*slog.Logger, error) {
+func Setup(env config.Env) (*slog.Logger, error) {
 	switch env {
-	case EnvLocal:
+	case config.EnvLocal:
 		return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.LevelDebug,
 		})), nil
-	case EnvDev:
+	case config.EnvDev:
 		return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.LevelDebug,
 		})), nil
-	case EnvProd:
+	case config.EnvProd:
 		return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: slog.LevelInfo,
 		})), nil

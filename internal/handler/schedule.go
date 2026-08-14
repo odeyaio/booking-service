@@ -62,10 +62,6 @@ func NewScheduleHandler(svc scheduleService) *ScheduleHandler {
 	return &ScheduleHandler{svc: svc}
 }
 
-func (h *ScheduleHandler) RegisterRoutes(e *echo.Echo) {
-	e.POST("/rooms/:roomId/schedule/create", h.Create)
-}
-
 func (h *ScheduleHandler) Create(c *echo.Context) error {
 	var req scheduleCreateRequest
 	if err := c.Bind(&req); err != nil {
