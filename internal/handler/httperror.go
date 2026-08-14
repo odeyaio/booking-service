@@ -10,11 +10,16 @@ import (
 )
 
 const (
-	ErrorCodeInvalidRequest = "INVALID_REQUEST"
-	ErrorCodeUnauthorized   = "UNAUTHORIZED"
-	ErrorCodeForbidden      = "FORBIDDEN"
-	ErrorCodeNotFound       = "NOT_FOUND"
-	ErrorCodeInternal       = "INTERNAL_ERROR"
+	ErrorCodeInvalidRequest    = "INVALID_REQUEST"
+	ErrorCodeUnauthorized      = "UNAUTHORIZED"
+	ErrorCodeForbidden         = "FORBIDDEN"
+	ErrorCodeNotFound          = "NOT_FOUND"
+	ErrorCodeSlotNotFound      = "SLOT_NOT_FOUND"
+	ErrorCodeSlotAlreadyBooked = "SLOT_ALREADY_BOOKED"
+	ErrorCodeBookingNotFound   = "BOOKING_NOT_FOUND"
+	ErrorCodeRoomNotFound      = "ROOM_NOT_FOUND"
+	ErrorCodeScheduleExists    = "SCHEDULE_EXISTS"
+	ErrorCodeInternal          = "INTERNAL_ERROR"
 )
 
 type ErrorResponse struct {
@@ -55,6 +60,11 @@ func (e *httpError) Error() string {
 
 func NewHTTPErrorHandler(log *slog.Logger) echo.HTTPErrorHandler {
 	return func(c *echo.Context, err error) {
+		response, unwrapErr := echo.UnwrapResponse(c.Response())
+		if unwrapErr == nil && response.Committed {
+			return
+		}
+
 		status := http.StatusInternalServerError
 		code := ErrorCodeInternal
 		message := "internal server error"

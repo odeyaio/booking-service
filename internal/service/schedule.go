@@ -2,11 +2,13 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
+	"github.com/odeyaio/booking-service/internal/repository"
 )
 
 type scheduleRepo interface {
@@ -66,6 +68,12 @@ func (s *ScheduleService) Create(
 	}
 
 	if err := s.scheduleRepo.Create(ctx, schedule); err != nil {
+		switch {
+		case errors.Is(err, repository.ErrNotFound):
+			err = ErrRoomNotFound
+		case errors.Is(err, repository.ErrAlreadyExists):
+			err = ErrScheduleExists
+		}
 		return model.Schedule{}, fmt.Errorf("%s: %w", op, err)
 	}
 

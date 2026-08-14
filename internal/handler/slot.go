@@ -57,8 +57,13 @@ func (h *SlotHandler) ListAvailable(c *echo.Context) error {
 
 	slots, err := h.svc.ListAvailable(c.Request().Context(), req.RoomID, req.Date)
 	if err != nil {
-		if errors.Is(err, service.ErrInvalidInput) {
+		switch {
+		case errors.Is(err, service.ErrInvalidInput):
 			return NewHTTPError(http.StatusBadRequest, ErrorCodeInvalidRequest, "invalid request")
+		case errors.Is(err, service.ErrRoomNotFound):
+			return NewHTTPError(http.StatusNotFound, ErrorCodeRoomNotFound, "room not found")
+		default:
+			return err
 		}
 	}
 

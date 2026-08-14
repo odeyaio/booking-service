@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -24,6 +25,11 @@ const querySlotListAvailable = `
 		  AND b.status_id = 1
 	  )
 	ORDER BY s.start`
+
+const querySlotByID = `
+	SELECT id, room_id, schedule_id, start, "end"
+	FROM slot
+	WHERE id = $1`
 
 type SlotRepository struct {
 	db *pgxpool.Pool
@@ -62,6 +68,25 @@ func (r *SlotRepository) CreateBatch(ctx context.Context, slots []model.Slot) er
 	}
 
 	return nil
+}
+
+func (r *SlotRepository) GetByID(ctx context.Context, id uuid.UUID) (model.Slot, error) {
+	const op = "SlotRepository.GetByID"
+
+	rows, err := r.db.Query(ctx, querySlotByID, id)
+	if err != nil {
+		return model.Slot{}, fmt.Errorf("%s: %w", op, err)
+	}
+
+	slot, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[model.Slot])
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			err = ErrNotFound
+		}
+		return model.Slot{}, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return slot, nil
 }
 
 func (r *SlotRepository) ListAvailable(

@@ -52,12 +52,16 @@ func main() {
 
 	slotRepo := repository.NewSlotRepository(db)
 	slotGenerator := service.NewSlotGenerator(slotRepo)
-	slotService := service.NewSlotService(slotRepo)
+	slotService := service.NewSlotService(slotRepo, roomRepo)
 	slotHandler := handler.NewSlotHandler(slotService)
 
 	scheduleRepo := repository.NewScheduleRepository(db)
 	scheduleService := service.NewScheduleService(scheduleRepo, slotGenerator)
 	scheduleHandler := handler.NewScheduleHandler(scheduleService)
+
+	bookingRepo := repository.NewBookingRepository(db)
+	bookingService := service.NewBookingService(bookingRepo, slotRepo)
+	bookingHandler := handler.NewBookingHandler(bookingService)
 
 	if cfg.Auth.DummyLogin.Enabled {
 		authHandler := handler.NewAuthHandler(
@@ -75,6 +79,12 @@ func main() {
 	admin := authenticated.Group("", handler.RequireRole(handler.RoleAdmin))
 	admin.POST("/rooms/create", roomHandler.Create)
 	admin.POST("/rooms/:roomId/schedule/create", scheduleHandler.Create)
+	admin.GET("/bookings/list", bookingHandler.List)
+
+	user := authenticated.Group("", handler.RequireRole(handler.RoleUser))
+	user.POST("/bookings/create", bookingHandler.Create)
+	user.GET("/bookings/my", bookingHandler.ListMy)
+	user.POST("/bookings/:bookingId/cancel", bookingHandler.Cancel)
 
 	server := &http.Server{
 		Addr:         ":8080",

@@ -75,11 +75,16 @@ func (h *ScheduleHandler) Create(c *echo.Context) error {
 		req.StartTime,
 		req.EndTime)
 	if err != nil {
-		if errors.Is(err, service.ErrInvalidInput) {
+		switch {
+		case errors.Is(err, service.ErrInvalidInput):
 			return NewHTTPError(http.StatusBadRequest, ErrorCodeInvalidRequest, "invalid request")
+		case errors.Is(err, service.ErrRoomNotFound):
+			return NewHTTPError(http.StatusNotFound, ErrorCodeRoomNotFound, "room not found")
+		case errors.Is(err, service.ErrScheduleExists):
+			return NewHTTPError(http.StatusConflict, ErrorCodeScheduleExists, "schedule already exists")
+		default:
+			return err
 		}
-
-		return err
 	}
 
 	return c.JSON(http.StatusCreated, scheduleCreateResponse{
