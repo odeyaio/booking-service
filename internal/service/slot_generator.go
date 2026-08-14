@@ -13,7 +13,7 @@ import (
 const slotDuration = 30 * time.Minute
 
 type slotCreator interface {
-	CreateBatch(ctx context.Context, slots []model.Slot) error
+	UpsertBatch(ctx context.Context, slots []model.Slot) error
 }
 
 type SlotGenerator struct {
@@ -78,7 +78,7 @@ func (g *SlotGenerator) Generate(
 		return nil
 	}
 
-	if err := g.slotCreator.CreateBatch(ctx, slots); err != nil {
+	if err := g.slotCreator.UpsertBatch(ctx, slots); err != nil {
 		return fmt.Errorf("%s: create slots: %w", op, err)
 	}
 

@@ -1112,12 +1112,12 @@ func (_m *MockSlotCreator) EXPECT() *MockSlotCreator_Expecter {
 	return &MockSlotCreator_Expecter{mock: &_m.Mock}
 }
 
-// CreateBatch provides a mock function for the type MockSlotCreator
-func (_mock *MockSlotCreator) CreateBatch(ctx context.Context, slots []model.Slot) error {
+// UpsertBatch provides a mock function for the type MockSlotCreator
+func (_mock *MockSlotCreator) UpsertBatch(ctx context.Context, slots []model.Slot) error {
 	ret := _mock.Called(ctx, slots)
 
 	if len(ret) == 0 {
-		panic("no return value specified for CreateBatch")
+		panic("no return value specified for UpsertBatch")
 	}
 
 	var r0 error
@@ -1129,19 +1129,19 @@ func (_mock *MockSlotCreator) CreateBatch(ctx context.Context, slots []model.Slo
 	return r0
 }
 
-// MockSlotCreator_CreateBatch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateBatch'
-type MockSlotCreator_CreateBatch_Call struct {
+// MockSlotCreator_UpsertBatch_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpsertBatch'
+type MockSlotCreator_UpsertBatch_Call struct {
 	*mock.Call
 }
 
-// CreateBatch is a helper method to define mock.On call
+// UpsertBatch is a helper method to define mock.On call
 //   - ctx context.Context
 //   - slots []model.Slot
-func (_e *MockSlotCreator_Expecter) CreateBatch(ctx any, slots any) *MockSlotCreator_CreateBatch_Call {
-	return &MockSlotCreator_CreateBatch_Call{Call: _e.mock.On("CreateBatch", ctx, slots)}
+func (_e *MockSlotCreator_Expecter) UpsertBatch(ctx any, slots any) *MockSlotCreator_UpsertBatch_Call {
+	return &MockSlotCreator_UpsertBatch_Call{Call: _e.mock.On("UpsertBatch", ctx, slots)}
 }
 
-func (_c *MockSlotCreator_CreateBatch_Call) Run(run func(ctx context.Context, slots []model.Slot)) *MockSlotCreator_CreateBatch_Call {
+func (_c *MockSlotCreator_UpsertBatch_Call) Run(run func(ctx context.Context, slots []model.Slot)) *MockSlotCreator_UpsertBatch_Call {
 	_c.Call.Run(func(args mock.Arguments) {
 		var arg0 context.Context
 		if args[0] != nil {
@@ -1159,12 +1159,12 @@ func (_c *MockSlotCreator_CreateBatch_Call) Run(run func(ctx context.Context, sl
 	return _c
 }
 
-func (_c *MockSlotCreator_CreateBatch_Call) Return(err error) *MockSlotCreator_CreateBatch_Call {
+func (_c *MockSlotCreator_UpsertBatch_Call) Return(err error) *MockSlotCreator_UpsertBatch_Call {
 	_c.Call.Return(err)
 	return _c
 }
 
-func (_c *MockSlotCreator_CreateBatch_Call) RunAndReturn(run func(ctx context.Context, slots []model.Slot) error) *MockSlotCreator_CreateBatch_Call {
+func (_c *MockSlotCreator_UpsertBatch_Call) RunAndReturn(run func(ctx context.Context, slots []model.Slot) error) *MockSlotCreator_UpsertBatch_Call {
 	_c.Call.Return(run)
 	return _c
 }

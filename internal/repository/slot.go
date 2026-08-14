@@ -32,6 +32,11 @@ const querySlotByID = `
 	FROM slot
 	WHERE id = $1`
 
+const querySlotUpsert = `
+	INSERT INTO slot (id, room_id, schedule_id, start, "end")
+	VALUES ($1, $2, $3, $4, $5)
+	ON CONFLICT (room_id, start) DO NOTHING`
+
 type SlotRepository struct {
 	db       *pgxpool.Pool
 	txGetter *trmpgx.CtxGetter
@@ -44,32 +49,34 @@ func NewSlotRepository(db *pgxpool.Pool) *SlotRepository {
 	}
 }
 
-func (r *SlotRepository) CreateBatch(ctx context.Context, slots []model.Slot) error {
-	const op = "SlotRepository.CreateBatch"
+func (r *SlotRepository) UpsertBatch(ctx context.Context, slots []model.Slot) error {
+	const op = "SlotRepository.UpsertBatch"
 
-	rows := make([][]any, 0, len(slots))
+	if len(slots) == 0 {
+		return nil
+	}
+
+	batch := &pgx.Batch{}
 	for _, slot := range slots {
-		rows = append(rows, []any{
+		batch.Queue(
+			querySlotUpsert,
 			slot.ID,
 			slot.RoomID,
 			slot.ScheduleID,
 			slot.Start,
 			slot.End,
-		})
+		)
 	}
 
-	if len(rows) == 0 {
-		return nil
+	results := r.txGetter.DefaultTrOrDB(ctx, r.db).SendBatch(ctx, batch)
+	for range slots {
+		if _, err := results.Exec(); err != nil {
+			_ = results.Close()
+			return fmt.Errorf("%s: %w", op, err)
+		}
 	}
-
-	_, err := r.txGetter.DefaultTrOrDB(ctx, r.db).CopyFrom(
-		ctx,
-		pgx.Identifier{"slot"},
-		[]string{"id", "room_id", "schedule_id", "start", "end"},
-		pgx.CopyFromRows(rows),
-	)
-	if err != nil {
-		return fmt.Errorf("%s: %w", op, err)
+	if err := results.Close(); err != nil {
+		return fmt.Errorf("%s: close batch: %w", op, err)
 	}
 
 	return nil

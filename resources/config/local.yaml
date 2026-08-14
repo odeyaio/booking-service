@@ -11,3 +11,8 @@ http:
   write_timeout: 15s
   idle_timeout: 60s
   shutdown_timeout: 30s
+
+workers:
+  slot_generator:
+    interval: 6h
+    window: 336h

@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	trmpgx "github.com/avito-tech/go-transaction-manager/drivers/pgxv5/v2"
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/odeyaio/booking-service/internal/model"
 )
@@ -23,6 +25,11 @@ const (
 	SELECT id, room_id, days_of_week, start_time, end_time
 	FROM schedule
 	WHERE room_id = $1`
+
+	queryScheduleList = `
+	SELECT id, room_id, days_of_week, start_time, end_time
+	FROM schedule
+	ORDER BY room_id`
 )
 
 type ScheduleRepository struct {
@@ -72,7 +79,7 @@ func (r *ScheduleRepository) GetByRoomID(ctx context.Context, roomID uuid.UUID) 
 		return model.Schedule{}, fmt.Errorf("%s: %w", op, err)
 	}
 
-	schedule, err := pgx.CollectExactlyOneRow(rows, pgx.RowToStructByName[model.Schedule])
+	schedule, err := pgx.CollectExactlyOneRow(rows, rowToSchedule)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return model.Schedule{}, fmt.Errorf("%s: %w", op, ErrNotFound)
@@ -82,4 +89,68 @@ func (r *ScheduleRepository) GetByRoomID(ctx context.Context, roomID uuid.UUID) 
 	}
 
 	return schedule, nil
+}
+
+func (r *ScheduleRepository) List(ctx context.Context) ([]model.Schedule, error) {
+	const op = "ScheduleRepository.List"
+
+	rows, err := r.txGetter.DefaultTrOrDB(ctx, r.db).Query(ctx, queryScheduleList)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	schedules, err := pgx.CollectRows(rows, rowToSchedule)
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return schedules, nil
+}
+
+func rowToSchedule(row pgx.CollectableRow) (model.Schedule, error) {
+	var (
+		schedule   model.Schedule
+		days       []int16
+		start, end pgtype.Time
+	)
+
+	if err := row.Scan(
+		&schedule.ID,
+		&schedule.RoomID,
+		&days,
+		&start,
+		&end,
+	); err != nil {
+		return model.Schedule{}, err
+	}
+
+	schedule.DaysOfWeek = make([]model.Weekday, 0, len(days))
+	for _, day := range days {
+		weekday, err := model.NewWeekday(int(day))
+		if err != nil {
+			return model.Schedule{}, err
+		}
+		schedule.DaysOfWeek = append(schedule.DaysOfWeek, weekday)
+	}
+
+	var err error
+	schedule.StartTime, err = timeOfDayFromPG(start)
+	if err != nil {
+		return model.Schedule{}, err
+	}
+	schedule.EndTime, err = timeOfDayFromPG(end)
+	if err != nil {
+		return model.Schedule{}, err
+	}
+
+	return schedule, nil
+}
+
+func timeOfDayFromPG(value pgtype.Time) (model.TimeOfDay, error) {
+	if !value.Valid {
+		return 0, errors.New("invalid null time")
+	}
+
+	minutes := value.Microseconds / int64(time.Minute/time.Microsecond)
+	return model.NewTimeOfDay(int(minutes/60), int(minutes%60))
 }

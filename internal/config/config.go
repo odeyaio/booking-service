@@ -22,8 +22,9 @@ const (
 type Config struct {
 	Env      Env `yaml:"env" env-default:"local"`
 	Database DatabaseConfig
-	Auth     AuthConfig `yaml:"auth"`
-	HTTP     HTTPConfig `yaml:"http"`
+	Auth     AuthConfig    `yaml:"auth"`
+	HTTP     HTTPConfig    `yaml:"http"`
+	Workers  WorkersConfig `yaml:"workers"`
 }
 
 type DatabaseConfig struct {
@@ -50,6 +51,15 @@ type HTTPConfig struct {
 	WriteTimeout    time.Duration `yaml:"write_timeout" env-default:"15s"`
 	IdleTimeout     time.Duration `yaml:"idle_timeout" env-default:"60s"`
 	ShutdownTimeout time.Duration `yaml:"shutdown_timeout" env-default:"30s"`
+}
+
+type WorkersConfig struct {
+	SlotGenerator SlotGeneratorWorkerConfig `yaml:"slot_generator"`
+}
+
+type SlotGeneratorWorkerConfig struct {
+	Interval time.Duration `yaml:"interval" env-default:"6h"`
+	Window   time.Duration `yaml:"window" env-default:"336h"`
 }
 
 func Load() (Config, error) {
@@ -79,6 +89,12 @@ func (c Config) Validate() error {
 	case EnvLocal, EnvDev, EnvProd:
 	default:
 		return fmt.Errorf("invalid environment: %q", c.Env)
+	}
+	if c.Workers.SlotGenerator.Interval <= 0 {
+		return errors.New("workers.slot_generator.interval must be positive")
+	}
+	if c.Workers.SlotGenerator.Window <= 0 {
+		return errors.New("workers.slot_generator.window must be positive")
 	}
 
 	if !c.Auth.DummyLogin.Enabled {

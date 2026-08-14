@@ -18,6 +18,7 @@ import (
 	"github.com/odeyaio/booking-service/internal/logger"
 	"github.com/odeyaio/booking-service/internal/repository"
 	"github.com/odeyaio/booking-service/internal/service"
+	"github.com/odeyaio/booking-service/internal/worker"
 )
 
 func main() {
@@ -34,7 +35,9 @@ func main() {
 	db, err := pgxpool.New(context.Background(), repository.ConnectionURL(cfg))
 	if err != nil {
 		log.Error("failed to connect to db", "err", err)
+		return
 	}
+	defer db.Close()
 	txManager := manager.Must(trmpgx.NewDefaultFactory(db))
 
 	e := echo.New()
@@ -54,17 +57,32 @@ func main() {
 	roomHandler := handler.NewRoomHandler(roomService)
 
 	slotRepo := repository.NewSlotRepository(db)
-	slotGenerator := service.NewSlotGenerator(slotRepo)
 	slotService := service.NewSlotService(slotRepo, roomRepo)
 	slotHandler := handler.NewSlotHandler(slotService)
 
 	scheduleRepo := repository.NewScheduleRepository(db)
+	slotGenerator := service.NewSlotGenerator(slotRepo)
 	scheduleService := service.NewScheduleService(scheduleRepo, slotGenerator, txManager)
 	scheduleHandler := handler.NewScheduleHandler(scheduleService)
 
 	bookingRepo := repository.NewBookingRepository(db)
 	bookingService := service.NewBookingService(bookingRepo, slotRepo)
 	bookingHandler := handler.NewBookingHandler(bookingService)
+
+	slotGeneratorWorker := worker.NewSlotGeneratorWorker(
+		scheduleRepo,
+		slotGenerator,
+		log,
+		cfg.Workers.SlotGenerator.Interval,
+		cfg.Workers.SlotGenerator.Window,
+	)
+	appCtx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+	workerDone := make(chan struct{})
+	go func() {
+		defer close(workerDone)
+		slotGeneratorWorker.Run(appCtx)
+	}()
 
 	if cfg.Auth.DummyLogin.Enabled {
 		authHandler := handler.NewAuthHandler(
@@ -105,9 +123,7 @@ func main() {
 		}
 	}()
 
-	quit := make(chan os.Signal, 1)
-	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-	<-quit
+	<-appCtx.Done()
 	log.Info("shutting down...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.HTTP.ShutdownTimeout)
@@ -116,6 +132,7 @@ func main() {
 	if err := server.Shutdown(ctx); err != nil {
 		log.Error("forced shutdown", "err", err)
 	}
+	<-workerDone
 
 	log.Info("server stopped")
 }
