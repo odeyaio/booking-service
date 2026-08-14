@@ -24,13 +24,34 @@ type slotRoomRepository interface {
 	GetByID(ctx context.Context, id uuid.UUID) (model.Room, error)
 }
 
-type SlotService struct {
-	repo     slotRepository
-	roomRepo slotRoomRepository
+type slotScheduleRepository interface {
+	GetByRoomID(ctx context.Context, roomID uuid.UUID) (model.Schedule, error)
 }
 
-func NewSlotService(repo slotRepository, roomRepo slotRoomRepository) *SlotService {
-	return &SlotService{repo: repo, roomRepo: roomRepo}
+type SlotService struct {
+	repo           slotRepository
+	roomRepo       slotRoomRepository
+	scheduleRepo   slotScheduleRepository
+	slotGenerator  slotGenerator
+	bookingHorizon time.Duration
+	now            func() time.Time
+}
+
+func NewSlotService(
+	repo slotRepository,
+	roomRepo slotRoomRepository,
+	scheduleRepo slotScheduleRepository,
+	slotGenerator slotGenerator,
+	bookingHorizon time.Duration,
+) *SlotService {
+	return &SlotService{
+		repo:           repo,
+		roomRepo:       roomRepo,
+		scheduleRepo:   scheduleRepo,
+		slotGenerator:  slotGenerator,
+		bookingHorizon: bookingHorizon,
+		now:            time.Now,
+	}
 }
 
 func (s *SlotService) ListAvailable(ctx context.Context, roomID uuid.UUID, dateString string) ([]model.Slot, error) {
@@ -40,6 +61,16 @@ func (s *SlotService) ListAvailable(ctx context.Context, roomID uuid.UUID, dateS
 	if err != nil {
 		return nil, fmt.Errorf("%s:%w", op, ErrInvalidInput)
 	}
+	now := s.now().UTC()
+	today := startOfDay(now)
+	if date.Before(today) || date.After(startOfDay(now.Add(s.bookingHorizon))) {
+		return nil, fmt.Errorf("%s: date is outside booking horizon: %w", op, ErrInvalidInput)
+	}
+	from := date
+	if date.Equal(today) {
+		from = now
+	}
+	to := date.AddDate(0, 0, 1)
 
 	if _, err := s.roomRepo.GetByID(ctx, roomID); err != nil {
 		if errors.Is(err, repository.ErrNotFound) {
@@ -48,7 +79,19 @@ func (s *SlotService) ListAvailable(ctx context.Context, roomID uuid.UUID, dateS
 		return nil, fmt.Errorf("%s: %w", op, err)
 	}
 
-	slots, err := s.repo.ListAvailable(ctx, roomID, date, date.AddDate(0, 0, 1))
+	schedule, err := s.scheduleRepo.GetByRoomID(ctx, roomID)
+	if err != nil {
+		if errors.Is(err, repository.ErrNotFound) {
+			return []model.Slot{}, nil
+		}
+		return nil, fmt.Errorf("%s: get schedule: %w", op, err)
+	}
+
+	if err := s.slotGenerator.Generate(ctx, schedule, from, to); err != nil {
+		return nil, fmt.Errorf("%s: generate slots: %w", op, err)
+	}
+
+	slots, err := s.repo.ListAvailable(ctx, roomID, from, to)
 	if err != nil {
 		return nil, fmt.Errorf("%s:%w", op, err)
 	}

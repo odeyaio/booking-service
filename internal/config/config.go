@@ -23,6 +23,7 @@ type Config struct {
 	Env      Env `yaml:"env" env-default:"local"`
 	Database DatabaseConfig
 	Auth     AuthConfig    `yaml:"auth"`
+	Booking  BookingConfig `yaml:"booking"`
 	HTTP     HTTPConfig    `yaml:"http"`
 	Workers  WorkersConfig `yaml:"workers"`
 }
@@ -44,6 +45,10 @@ type DummyLoginConfig struct {
 	Enabled     bool      `yaml:"enabled"`
 	AdminUserID uuid.UUID `yaml:"admin_user_id"`
 	UserUserID  uuid.UUID `yaml:"user_user_id"`
+}
+
+type BookingConfig struct {
+	Horizon time.Duration `yaml:"horizon" env-default:"2160h"`
 }
 
 type HTTPConfig struct {
@@ -95,6 +100,9 @@ func (c Config) Validate() error {
 	}
 	if c.Workers.SlotGenerator.Window <= 0 {
 		return errors.New("workers.slot_generator.window must be positive")
+	}
+	if c.Booking.Horizon <= 0 {
+		return errors.New("booking.horizon must be positive")
 	}
 
 	if !c.Auth.DummyLogin.Enabled {

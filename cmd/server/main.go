@@ -57,11 +57,17 @@ func main() {
 	roomHandler := handler.NewRoomHandler(roomService)
 
 	slotRepo := repository.NewSlotRepository(db)
-	slotService := service.NewSlotService(slotRepo, roomRepo)
-	slotHandler := handler.NewSlotHandler(slotService)
-
 	scheduleRepo := repository.NewScheduleRepository(db)
 	slotGenerator := service.NewSlotGenerator(slotRepo)
+	slotService := service.NewSlotService(
+		slotRepo,
+		roomRepo,
+		scheduleRepo,
+		slotGenerator,
+		cfg.Booking.Horizon,
+	)
+	slotHandler := handler.NewSlotHandler(slotService)
+
 	scheduleService := service.NewScheduleService(scheduleRepo, slotGenerator, txManager)
 	scheduleHandler := handler.NewScheduleHandler(scheduleService)
 
