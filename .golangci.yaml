@@ -16,11 +16,11 @@ linters:
     - nilerr
     - copyloopvar
 
-    - goconst
     - gocritic
     - whitespace
 
     - gosec
+    - govet
 
   exclusions:
     presets:
