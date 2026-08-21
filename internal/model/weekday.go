@@ -18,12 +18,11 @@ const (
 )
 
 func NewWeekday(value int) (Weekday, error) {
-	day := Weekday(value)
-	if !day.Valid() {
+	if value < int(Monday) || value > int(Sunday) {
 		return 0, fmt.Errorf("invalid weekday: %d", value)
 	}
 
-	return day, nil
+	return Weekday(value), nil
 }
 
 func (d Weekday) Valid() bool {
@@ -38,10 +37,14 @@ func (d Weekday) TimeWeekday() time.Weekday {
 	return time.Weekday(d)
 }
 
-func WeekdayFromTime(day time.Weekday) Weekday {
-	if day == time.Sunday {
-		return Sunday
+func WeekdayFromTime(day time.Weekday) (Weekday, error) {
+	if day < time.Sunday || day > time.Saturday {
+		return 0, fmt.Errorf("invalid time.Weekday: %d", day)
 	}
 
-	return Weekday(day)
+	if day == time.Sunday {
+		return Sunday, nil
+	}
+
+	return Weekday(day), nil
 }

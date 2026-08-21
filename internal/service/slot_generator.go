@@ -50,7 +50,12 @@ func (g *SlotGenerator) Generate(
 	slots := make([]model.Slot, 0, slotCountPerDay*dayCount)
 
 	for date := startOfDay(from); date.Before(to); date = date.AddDate(0, 0, 1) {
-		if !slices.Contains(schedule.DaysOfWeek, model.WeekdayFromTime(date.Weekday())) {
+		weekday, err := model.WeekdayFromTime(date.Weekday())
+		if err != nil {
+			return fmt.Errorf("%s: %w", op, ErrInvalidInput)
+		}
+
+		if !slices.Contains(schedule.DaysOfWeek, weekday) {
 			continue
 		}
 
