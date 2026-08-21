@@ -14,12 +14,12 @@ import (
 )
 
 func TestSlotService_ListAvailable(t *testing.T) {
-	roomID := uuid.New()
+	roomID := uuid.NewV7()
 	now := time.Date(2026, time.August, 15, 12, 0, 0, 0, time.UTC)
 	date := time.Date(2026, time.August, 16, 0, 0, 0, 0, time.UTC)
 	bookingHorizon := 90 * 24 * time.Hour
-	wantSlots := []model.Slot{{ID: uuid.New(), RoomID: roomID}}
-	schedule := model.Schedule{ID: uuid.New(), RoomID: roomID}
+	wantSlots := []model.Slot{{ID: uuid.NewV7(), RoomID: roomID}}
+	schedule := model.Schedule{ID: uuid.NewV7(), RoomID: roomID}
 
 	newService := func(t *testing.T) (
 		*SlotService,

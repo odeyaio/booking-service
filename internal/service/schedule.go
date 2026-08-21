@@ -73,7 +73,7 @@ func (s *ScheduleService) Create(
 	}
 
 	schedule := model.Schedule{
-		ID:         uuid.New(),
+		ID:         uuid.NewV7(),
 		RoomID:     roomID,
 		DaysOfWeek: weekdays,
 		StartTime:  startTimeOfDay,

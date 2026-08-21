@@ -48,7 +48,7 @@ func (s *UserService) Register(
 	}
 
 	user := model.User{
-		ID:           uuid.New(),
+		ID:           uuid.NewV7(),
 		Email:        email,
 		PasswordHash: string(passwordHash),
 		RoleID:       roleID,

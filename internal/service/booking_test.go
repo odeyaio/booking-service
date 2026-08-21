@@ -18,8 +18,8 @@ import (
 func TestBookingService_Create(t *testing.T) {
 	now := time.Date(2026, time.August, 15, 12, 0, 0, 0, time.UTC)
 	createdAt := now.Add(time.Minute)
-	userID := uuid.New()
-	slotID := uuid.New()
+	userID := uuid.NewV7()
+	slotID := uuid.NewV7()
 
 	tests := []struct {
 		name       string
@@ -65,7 +65,7 @@ func TestBookingService_Create(t *testing.T) {
 				repo.EXPECT().
 					Create(mock.Anything, mock.AnythingOfType("*model.Booking")).
 					Run(func(_ context.Context, booking *model.Booking) {
-						assert.NotEqual(t, uuid.Nil, booking.ID)
+						assert.NotEqual(t, uuid.Nil(), booking.ID)
 						assert.Equal(t, slotID, booking.SlotID)
 						assert.Equal(t, userID, booking.UserID)
 						assert.Equal(t, model.BookingStatusActive, booking.StatusID)
@@ -94,7 +94,7 @@ func TestBookingService_List(t *testing.T) {
 	repo := NewMockBookingRepository(t)
 	repo.EXPECT().
 		List(mock.Anything, 20, 40).
-		Return([]model.Booking{{ID: uuid.New()}}, 45, nil).
+		Return([]model.Booking{{ID: uuid.NewV7()}}, 45, nil).
 		Once()
 	svc := NewBookingService(repo, NewMockBookingSlotRepository(t))
 
@@ -111,8 +111,8 @@ func TestBookingService_List(t *testing.T) {
 
 func TestBookingService_ListMy(t *testing.T) {
 	now := time.Date(2026, time.August, 15, 12, 0, 0, 0, time.UTC)
-	userID := uuid.New()
-	want := []model.Booking{{ID: uuid.New(), UserID: userID}}
+	userID := uuid.NewV7()
+	want := []model.Booking{{ID: uuid.NewV7(), UserID: userID}}
 	repo := NewMockBookingRepository(t)
 	repo.EXPECT().
 		ListByUser(mock.Anything, userID, now).
@@ -127,9 +127,9 @@ func TestBookingService_ListMy(t *testing.T) {
 }
 
 func TestBookingService_Cancel(t *testing.T) {
-	userID := uuid.New()
-	otherUserID := uuid.New()
-	bookingID := uuid.New()
+	userID := uuid.NewV7()
+	otherUserID := uuid.NewV7()
+	bookingID := uuid.NewV7()
 
 	tests := []struct {
 		name       string
@@ -197,11 +197,11 @@ func TestBookingService_Cancel(t *testing.T) {
 func TestBookingService_RejectsEmptyIDs(t *testing.T) {
 	svc := NewBookingService(NewMockBookingRepository(t), NewMockBookingSlotRepository(t))
 
-	_, err := svc.Create(context.Background(), uuid.Nil(), uuid.New())
+	_, err := svc.Create(context.Background(), uuid.Nil(), uuid.NewV7())
 	require.ErrorIs(t, err, ErrInvalidInput)
 	_, err = svc.ListMy(context.Background(), uuid.Nil())
 	require.ErrorIs(t, err, ErrInvalidInput)
-	_, err = svc.Cancel(context.Background(), uuid.New(), uuid.Nil())
+	_, err = svc.Cancel(context.Background(), uuid.NewV7(), uuid.Nil())
 	require.ErrorIs(t, err, ErrInvalidInput)
 }
 

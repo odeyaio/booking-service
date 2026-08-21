@@ -18,8 +18,8 @@ func TestSlotGeneratorWorker_RunOnce(t *testing.T) {
 	now := time.Date(2026, time.August, 15, 12, 0, 0, 0, time.UTC)
 	window := 14 * 24 * time.Hour
 	schedules := []model.Schedule{
-		{ID: uuid.New()},
-		{ID: uuid.New()},
+		{ID: uuid.NewV7()},
+		{ID: uuid.NewV7()},
 	}
 	listErr := errors.New("cannot list schedules")
 	generatorErr := errors.New("database unavailable")

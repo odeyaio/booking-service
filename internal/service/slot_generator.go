@@ -65,7 +65,7 @@ func (g *SlotGenerator) Generate(
 			}
 
 			slots = append(slots, model.Slot{
-				ID:         uuid.New(),
+				ID:         uuid.NewV7(),
 				RoomID:     schedule.RoomID,
 				ScheduleID: schedule.ID,
 				Start:      slotStart,

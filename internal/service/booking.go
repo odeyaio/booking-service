@@ -61,7 +61,7 @@ func (s *BookingService) Create(
 	}
 
 	booking := model.Booking{
-		ID:       uuid.New(),
+		ID:       uuid.NewV7(),
 		SlotID:   slotID,
 		UserID:   userID,
 		StatusID: model.BookingStatusActive,

@@ -123,7 +123,7 @@ func TestUserService_Login(t *testing.T) {
 	require.NoError(t, err)
 	repoErr := errors.New("database unavailable")
 	wantUser := model.User{
-		ID:           uuid.New(),
+		ID:           uuid.NewV7(),
 		Email:        "user@example.com",
 		PasswordHash: string(passwordHash),
 		RoleID:       model.RoleUser,

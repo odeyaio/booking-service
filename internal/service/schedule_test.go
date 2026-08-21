@@ -16,7 +16,7 @@ import (
 func TestScheduleService_Create(t *testing.T) {
 	type contextKey struct{}
 
-	roomID := uuid.New()
+	roomID := uuid.NewV7()
 	txCtx := context.WithValue(context.Background(), contextKey{}, "transaction")
 	generatorErr := errors.New("cannot create slots")
 
@@ -100,7 +100,7 @@ func TestScheduleService_Create(t *testing.T) {
 			}
 
 			require.NoError(t, err)
-			assert.NotEqual(t, uuid.Nil, got.ID)
+			assert.NotEqual(t, uuid.Nil(), got.ID)
 			assert.Equal(t, roomID, got.RoomID)
 			assert.Equal(t, []model.Weekday{model.Monday}, got.DaysOfWeek)
 			assert.Equal(t, "09:00", got.StartTime.String())

@@ -108,7 +108,7 @@ func TestBookingHandler_ListDefaults(t *testing.T) {
 }
 
 func TestBookingHandler_ListMyUsesPrincipal(t *testing.T) {
-	userID := uuid.New()
+	userID := uuid.NewV7()
 	svc := NewMockBookingService(t)
 	svc.EXPECT().
 		ListMy(mock.Anything, userID).
@@ -123,7 +123,7 @@ func TestBookingHandler_ListMyUsesPrincipal(t *testing.T) {
 }
 
 func TestBookingHandler_CancelForbidden(t *testing.T) {
-	userID := uuid.New()
+	userID := uuid.NewV7()
 	bookingID := uuid.MustParse("22222222-2222-2222-2222-222222222222")
 	svc := NewMockBookingService(t)
 	svc.EXPECT().

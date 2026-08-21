@@ -98,7 +98,7 @@ func TestService_Create(t *testing.T) {
 
 			require.NoError(t, err)
 			require.NotNil(t, tt.want)
-			assert.NotEqual(t, uuid.Nil, got.ID)
+			assert.NotEqual(t, uuid.Nil(), got.ID)
 			assert.Equal(t, tt.want.Name, got.Name)
 			assert.Equal(t, tt.want.Description, got.Description)
 			assert.Equal(t, tt.want.Capacity, got.Capacity)

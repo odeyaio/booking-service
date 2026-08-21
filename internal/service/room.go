@@ -35,7 +35,7 @@ func (s *RoomService) Create(ctx context.Context, name string, description *stri
 	}
 
 	room := model.Room{
-		ID:          uuid.New(),
+		ID:          uuid.NewV7(),
 		Name:        name,
 		Description: description,
 		Capacity:    capacity,
