@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/repository"
 	"github.com/stretchr/testify/assert"

@@ -6,10 +6,10 @@ package service
 
 import (
 	"context"
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	mock "github.com/stretchr/testify/mock"
 	"time"
+	"uuid"
 )
 
 // NewMockBookingRepository creates a new instance of MockBookingRepository. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

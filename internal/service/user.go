@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/mail"
 	"strings"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/repository"
 	"golang.org/x/crypto/bcrypt"

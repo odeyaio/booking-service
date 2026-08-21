@@ -7,8 +7,8 @@ import (
 	"log/slog"
 	"testing"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

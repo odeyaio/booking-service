@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/repository"
 	"github.com/stretchr/testify/assert"
@@ -30,7 +30,7 @@ func TestScheduleService_Create(t *testing.T) {
 			setupMock: func(repo *MockScheduleRepo, generator *MockSlotGenerator) {
 				repo.EXPECT().
 					Create(txCtx, mock.MatchedBy(func(schedule model.Schedule) bool {
-						return schedule.ID != uuid.Nil && schedule.RoomID == roomID
+						return schedule.ID != uuid.Nil() && schedule.RoomID == roomID
 					})).
 					Return(nil).
 					Once()

@@ -3,8 +3,8 @@ package handler
 import (
 	"net/http"
 	"testing"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/service"
 	"github.com/stretchr/testify/mock"

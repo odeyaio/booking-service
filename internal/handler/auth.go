@@ -3,9 +3,9 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"uuid"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/google/uuid"
 	echojwt "github.com/labstack/echo-jwt/v5"
 	"github.com/labstack/echo/v5"
 )
@@ -30,7 +30,7 @@ type AuthClaims struct {
 }
 
 func (c AuthClaims) Validate() error {
-	if c.UserID == uuid.Nil {
+	if c.UserID == uuid.Nil() {
 		return errors.New("user_id is required")
 	}
 

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/pagination"
 	"github.com/odeyaio/booking-service/internal/repository"
@@ -45,7 +45,7 @@ func (s *BookingService) Create(
 ) (model.Booking, error) {
 	const op = "BookingService.Create"
 
-	if userID == uuid.Nil || slotID == uuid.Nil {
+	if userID == uuid.Nil() || slotID == uuid.Nil() {
 		return model.Booking{}, fmt.Errorf("%s: %w", op, ErrInvalidInput)
 	}
 
@@ -100,7 +100,7 @@ func (s *BookingService) List(
 func (s *BookingService) ListMy(ctx context.Context, userID uuid.UUID) ([]model.Booking, error) {
 	const op = "BookingService.ListMy"
 
-	if userID == uuid.Nil {
+	if userID == uuid.Nil() {
 		return nil, fmt.Errorf("%s: %w", op, ErrInvalidInput)
 	}
 
@@ -119,7 +119,7 @@ func (s *BookingService) Cancel(
 ) (model.Booking, error) {
 	const op = "BookingService.Cancel"
 
-	if userID == uuid.Nil || bookingID == uuid.Nil {
+	if userID == uuid.Nil() || bookingID == uuid.Nil() {
 		return model.Booking{}, fmt.Errorf("%s: %w", op, ErrInvalidInput)
 	}
 

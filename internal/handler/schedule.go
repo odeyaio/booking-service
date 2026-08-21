@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/service"

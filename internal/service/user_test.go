@@ -6,8 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/repository"
 	"github.com/stretchr/testify/assert"
@@ -35,7 +35,7 @@ func TestUserService_Register(t *testing.T) {
 			setupMock: func(repo *MockUserRepository) {
 				repo.EXPECT().
 					Create(mock.Anything, mock.MatchedBy(func(user *model.User) bool {
-						return user.ID != uuid.Nil &&
+						return user.ID != uuid.Nil() &&
 							user.Email == "user@example.com" &&
 							user.RoleID == model.RoleUser &&
 							bcrypt.CompareHashAndPassword(

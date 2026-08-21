@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"testing"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -36,7 +36,7 @@ func TestService_Create(t *testing.T) {
 			setupMock: func(repo *MockRoomRepository) {
 				repo.EXPECT().
 					Create(ctx, mock.MatchedBy(func(room *model.Room) bool {
-						return room.ID != uuid.Nil &&
+						return room.ID != uuid.Nil() &&
 							room.Name == "Room 1" &&
 							room.Description == &description &&
 							room.Capacity == &capacity
@@ -67,7 +67,7 @@ func TestService_Create(t *testing.T) {
 			setupMock: func(repo *MockRoomRepository) {
 				repo.EXPECT().
 					Create(ctx, mock.MatchedBy(func(room *model.Room) bool {
-						return room.ID != uuid.Nil && room.Name == "Room 1"
+						return room.ID != uuid.Nil() && room.Name == "Room 1"
 					})).
 					Return(repoErr).
 					Once()

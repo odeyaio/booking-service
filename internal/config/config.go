@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/ilyakaznacheev/cleanenv"
 	"github.com/joho/godotenv"
 )
@@ -108,10 +108,10 @@ func (c Config) Validate() error {
 	if !c.Auth.DummyLogin.Enabled {
 		return nil
 	}
-	if c.Auth.DummyLogin.AdminUserID == uuid.Nil {
+	if c.Auth.DummyLogin.AdminUserID == uuid.Nil() {
 		return errors.New("auth.dummy_login.admin_user_id is required when dummy login is enabled")
 	}
-	if c.Auth.DummyLogin.UserUserID == uuid.Nil {
+	if c.Auth.DummyLogin.UserUserID == uuid.Nil() {
 		return errors.New("auth.dummy_login.user_user_id is required when dummy login is enabled")
 	}
 

@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/odeyaio/booking-service/internal/model"
 	"github.com/odeyaio/booking-service/internal/pagination"
 	"github.com/odeyaio/booking-service/internal/repository"
@@ -197,11 +197,11 @@ func TestBookingService_Cancel(t *testing.T) {
 func TestBookingService_RejectsEmptyIDs(t *testing.T) {
 	svc := NewBookingService(NewMockBookingRepository(t), NewMockBookingSlotRepository(t))
 
-	_, err := svc.Create(context.Background(), uuid.Nil, uuid.New())
+	_, err := svc.Create(context.Background(), uuid.Nil(), uuid.New())
 	require.ErrorIs(t, err, ErrInvalidInput)
-	_, err = svc.ListMy(context.Background(), uuid.Nil)
+	_, err = svc.ListMy(context.Background(), uuid.Nil())
 	require.ErrorIs(t, err, ErrInvalidInput)
-	_, err = svc.Cancel(context.Background(), uuid.New(), uuid.Nil)
+	_, err = svc.Cancel(context.Background(), uuid.New(), uuid.Nil())
 	require.ErrorIs(t, err, ErrInvalidInput)
 }
 

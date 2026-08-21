@@ -2,8 +2,7 @@ package model
 
 import (
 	"time"
-
-	"github.com/google/uuid"
+	"uuid"
 )
 
 type Slot struct {
