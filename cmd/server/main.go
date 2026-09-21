@@ -48,7 +48,7 @@ func main() {
 	e.Use(middleware.RequestLogger())
 	e.Use(middleware.Recover())
 
-	e.GET("/_info", func(c *echo.Context) error {
+	e.Any("/_info", func(c *echo.Context) error {
 		return nil
 	})
 
