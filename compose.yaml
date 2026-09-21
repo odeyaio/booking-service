@@ -17,7 +17,7 @@ services:
       - internal
 
   migrate:
-    image: migrate/migrate:v4.19.1
+    image: migrate/migrate:v4.20.1
     volumes:
       - ./resources/migrations:/migrations:ro
     entrypoint:
