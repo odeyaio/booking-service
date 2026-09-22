@@ -13,6 +13,7 @@ import (
 const slotDuration = 30 * time.Minute
 
 type slotCreator interface {
+	CountInRange(ctx context.Context, roomID uuid.UUID, from, to time.Time) (int, error)
 	UpsertBatch(ctx context.Context, slots []model.Slot) error
 }
 
@@ -80,6 +81,16 @@ func (g *SlotGenerator) Generate(
 	}
 
 	if len(slots) == 0 {
+		return nil
+	}
+
+	// Slots are a deterministic grid of the room's single schedule, so if the
+	// count of stored slots within [from, to) matches, all of them exist.
+	existing, err := g.slotCreator.CountInRange(ctx, schedule.RoomID, from, to)
+	if err != nil {
+		return fmt.Errorf("%s: count slots: %w", op, err)
+	}
+	if existing >= len(slots) {
 		return nil
 	}
 

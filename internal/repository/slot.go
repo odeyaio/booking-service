@@ -32,6 +32,13 @@ const querySlotByID = `
 	FROM slot
 	WHERE id = $1`
 
+const querySlotCountInRange = `
+	SELECT count(*)
+	FROM slot
+	WHERE room_id = $1
+	  AND start >= $2
+	  AND "end" <= $3`
+
 const querySlotUpsert = `
 	INSERT INTO slot (id, room_id, schedule_id, start, "end")
 	VALUES ($1, $2, $3, $4, $5)
@@ -47,6 +54,25 @@ func NewSlotRepository(db *pgxpool.Pool) *SlotRepository {
 		db:       db,
 		txGetter: trmpgx.DefaultCtxGetter,
 	}
+}
+
+func (r *SlotRepository) CountInRange(
+	ctx context.Context,
+	roomID uuid.UUID,
+	from time.Time,
+	to time.Time,
+) (int, error) {
+	const op = "SlotRepository.CountInRange"
+
+	var count int
+	err := r.txGetter.DefaultTrOrDB(ctx, r.db).
+		QueryRow(ctx, querySlotCountInRange, roomID, from, to).
+		Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("%s: %w", op, err)
+	}
+
+	return count, nil
 }
 
 func (r *SlotRepository) UpsertBatch(ctx context.Context, slots []model.Slot) error {
