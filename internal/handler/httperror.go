@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"strings"
 
 	"github.com/labstack/echo/v5"
 )
@@ -73,10 +74,27 @@ func NewHTTPErrorHandler(log *slog.Logger) echo.HTTPErrorHandler {
 			status = appErr.status
 			code = appErr.code
 			message = appErr.message
+		} else if echoStatus := echo.StatusCode(err); echoStatus >= 400 && echoStatus < 500 {
+			status = echoStatus
+			code = errorCodeFromStatus(status)
+			message = strings.ToLower(http.StatusText(status))
 		} else {
 			log.Error("request failed", "err", err)
 		}
 
 		_ = c.JSON(status, NewErrorResponse(code, message))
+	}
+}
+
+func errorCodeFromStatus(status int) string {
+	switch status {
+	case http.StatusUnauthorized:
+		return ErrorCodeUnauthorized
+	case http.StatusForbidden:
+		return ErrorCodeForbidden
+	case http.StatusNotFound:
+		return ErrorCodeNotFound
+	default:
+		return ErrorCodeInvalidRequest
 	}
 }
