@@ -1,5 +1,5 @@
--include .env
 -include .env_example
+-include .env
 export
 
 MIGRATE_STEPS ?= 1
